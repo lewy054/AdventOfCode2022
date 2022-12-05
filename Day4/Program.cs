@@ -10,9 +10,7 @@ void PartOne(string filePath)
         var elvesPair = line.Split(",");
         var firstElf = GetElfSector(elvesPair[0]).ToList();
         var secondElf = GetElfSector(elvesPair[1]).ToList();
-        var enumerable = firstElf.Except(secondElf);
-        var enumerable1 = secondElf.Except(firstElf);
-        if (!enumerable.Any() || !enumerable1.Any())
+        if (!firstElf.Except(secondElf).Any() || !secondElf.Except(firstElf).Any())
         {
             sum++;
         }
@@ -29,9 +27,7 @@ void PartTwo(string filePath)
         var elvesPair = line.Split(",");
         var firstElf = GetElfSector(elvesPair[0]).ToList();
         var secondElf = GetElfSector(elvesPair[1]).ToList();
-        var enumerable = firstElf.Intersect(secondElf);
-        var enumerable1 = secondElf.Intersect(firstElf);
-        if (enumerable.Any() || enumerable1.Any())
+        if (firstElf.Intersect(secondElf).Any() || secondElf.Intersect(firstElf).Any())
         {
             sum++;
         }
