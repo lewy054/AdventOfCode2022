@@ -3,7 +3,7 @@
 var file = Path.Combine(Directory.GetCurrentDirectory(), "input.txt");
 const int firstPackagePosition = 1;
 const int spacingBetweenPacks = 4;
-const int rows = 9;
+const int numberOfColumns = 9;
 
 PartOne();
 PartTwo();
@@ -12,14 +12,8 @@ void PartOne()
 {
     var stacks = PrepareStacks();
     var instructions = ReadInstruction();
-    foreach (var instruction in instructions)
-    {
-        var (move, from, to) = GetOneInstructionDetails(instruction);
-        stacks[to] = stacks[to].Insert(0, new string(stacks[from].Take(move).Reverse().ToArray()));
-        stacks[from] = stacks[from].Remove(0, move);
-    }
-
-    var result = stacks.Aggregate("", (current, stack) => current + stack.First());
+    var sortedStacks = SortCrates(stacks, instructions, false);
+    var result = sortedStacks.Aggregate("", (current, stack) => current + stack.First());
     Console.WriteLine(result);
 }
 
@@ -28,21 +22,35 @@ void PartTwo()
 {
     var stacks = PrepareStacks();
     var instructions = ReadInstruction();
+    var sortedStacks = SortCrates(stacks, instructions, true);
+    var result = sortedStacks.Aggregate("", (current, stack) => current + stack.First());
+    Console.WriteLine(result);
+}
+
+IEnumerable<string> SortCrates(IList<string> stacks, IEnumerable<string> instructions, bool abilityToPickUpMultipleCrates)
+{
     foreach (var instruction in instructions)
     {
         var (move, from, to) = GetOneInstructionDetails(instruction);
-        stacks[to] = stacks[to].Insert(0, new string(stacks[from].Take(move).ToArray()));
+        var liftedCrates = stacks[from].Take(move);
+        if (!abilityToPickUpMultipleCrates)
+        {
+            liftedCrates = liftedCrates.Reverse();
+        }
+
+        liftedCrates = new string(liftedCrates.ToArray());
+
+        stacks[to] = stacks[to].Insert(0, liftedCrates.ToString() ?? string.Empty);
         stacks[from] = stacks[from].Remove(0, move);
     }
 
-    var result = stacks.Aggregate("", (current, stack) => current + stack.First());
-    Console.WriteLine(result);
+    return stacks;
 }
 
 List<string> PrepareStacks()
 {
     var stacksInput = File.ReadLines(file).TakeWhile(line => !string.IsNullOrEmpty(line)).SkipLast(1).ToList();
-    var stacks = new List<string>(new string[rows]);
+    var stacks = new List<string>(new string[numberOfColumns]);
 
     foreach (var stackInput in stacksInput)
     {
@@ -61,7 +69,7 @@ List<string> PrepareStacks()
     return stacks.Select(e => e.Trim(' ')).ToList();
 }
 
-List<string> ReadInstruction()
+IEnumerable<string> ReadInstruction()
 {
     return File.ReadLines(file)
         .SkipWhile(line => !string.IsNullOrEmpty(line))
