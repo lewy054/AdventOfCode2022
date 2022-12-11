@@ -3,13 +3,13 @@
 class Monkey
 {
     public int Id { get; set; }
-    public int InspectedItems { get; set; } = 0;
-    public List<int> Items { get; set; }
+    public long InspectedItems { get; set; } = 0;
+    public List<long> Items { get; set; }
     public string OperationType { get; set; }
     public string OperationValue { get; set; }
     public Test Test { get; set; }
 
-    public Monkey(int id, List<int> items, string operationType, string operationValue, Test test)
+    public Monkey(int id, List<long> items, string operationType, string operationValue, Test test)
     {
         Id = id;
         Items = items;
@@ -18,16 +18,24 @@ class Monkey
         Test = test;
     }
 
-    public Dictionary<int, List<int>> InspectItems()
+    public Dictionary<int, List<long>> InspectItems(int modulo, bool part2 = false)
     {
-        var itemsToPass = new Dictionary<int, List<int>>();
+        var itemsToPass = new Dictionary<int, List<long>>();
         var itemsCount = Items.Count;
         for (var index = 0; index < itemsCount; index++)
         {
-            Items[index] = StarInspectionOfItem(Items[index]);
-            Items[index] = LevelAfterMonkeyGetsBored(Items[index]);
+            if (part2)
+            {
+                var value = StarInspectionOfItem(Items[index]);
+                Items[index] = LevelAfterMonkeyGetsBored(value, modulo);
+            }
+            else
+            {
+                var value = StarInspectionOfItem(Items[index]);
+                Items[index] = LevelAfterMonkeyGetsBored(value);
+            }
 
-            var monkeyToPassTo = ChooseMonkeyToThrowToHer(Items[index]);
+            var monkeyToPassTo = ChooseMonkeyToThrowToHer((int)Items[index]);
             if (itemsToPass.ContainsKey(monkeyToPassTo))
             {
                 itemsToPass.TryGetValue(monkeyToPassTo, out var existingItems);
@@ -35,7 +43,7 @@ class Monkey
             }
             else
             {
-                itemsToPass.Add(monkeyToPassTo, new List<int> { Items[index] });
+                itemsToPass.Add(monkeyToPassTo, new List<long> { Items[index] });
             }
 
             InspectedItems++;
@@ -45,10 +53,10 @@ class Monkey
 
         return itemsToPass;
     }
-
-    private int StarInspectionOfItem(int item)
+    
+    private long StarInspectionOfItem(long item)
     {
-        var value = OperationValue == "" ? item : int.Parse(OperationValue);
+        var value = OperationValue == "" ? item : long.Parse(OperationValue);
         return OperationType switch
         {
             "*" => item * value,
@@ -59,9 +67,14 @@ class Monkey
         };
     }
 
-    private int LevelAfterMonkeyGetsBored(int item)
+    private long LevelAfterMonkeyGetsBored(long item)
     {
         return item / 3;
+    }
+    
+    private long LevelAfterMonkeyGetsBored(long item, int modulo)
+    {
+        return item % modulo;
     }
 
     private int ChooseMonkeyToThrowToHer(int item)

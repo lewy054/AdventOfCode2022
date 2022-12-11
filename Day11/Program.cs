@@ -4,18 +4,22 @@ using Day11;
 
 const int monkeyInfoLength = 6;
 const int partOneRounds = 20;
+const int partTwoRounds = 10000;
 Main(partOneRounds);
+Main(partTwoRounds, true);
 
-void Main(int rounds)
+void Main(int rounds, bool part2 = false)
 {
     var file = Path.Combine(Directory.GetCurrentDirectory(), "input.txt");
     var input = File.ReadAllLines(file).Where(e => e != string.Empty).ToArray();
     var monkeys = MapInputToObjects(input).ToList();
+    var dividers = monkeys.Select(e => e.Test.Value);
+    var modulo = dividers.Aggregate((result, next) => result * next);
     for (int roundIndex = 0; roundIndex < rounds; roundIndex++)
     {
         foreach (var monkey in monkeys)
         {
-            var itemsToPass = monkey.InspectItems();
+            var itemsToPass = monkey.InspectItems(modulo, part2);
             foreach (var value in itemsToPass)
             {
                 monkeys.FirstOrDefault(e => e.Id == value.Key)?.Items.AddRange(value.Value);
@@ -36,7 +40,7 @@ IEnumerable<Monkey> MapInputToObjects(IReadOnlyCollection<string> lines)
         var monkeyLines = lines.Skip(i * monkeyInfoLength).Take(monkeyInfoLength).ToList();
         var id = int.Parse(Regex.Match(monkeyLines[(int)ObjectStructure.Id], "\\d").Value);
         var startingItems = Regex.Matches(monkeyLines[(int)ObjectStructure.Items], "\\d+").ToList();
-        var items = startingItems.Select(e => int.Parse(e.Value)).ToList();
+        var items = startingItems.Select(e => long.Parse(e.Value)).ToList();
         var operationValue = Regex.Match(monkeyLines[(int)ObjectStructure.Operation], "\\d+").ToString();
         var operationType = Regex.Match(monkeyLines[(int)ObjectStructure.Operation], "[+-\\/*]").ToString();
 
